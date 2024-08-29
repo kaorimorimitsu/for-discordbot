@@ -26,17 +26,17 @@ import json
 
 
 # 画像取得
-import discord 
-import random
+
 
 # 画像で現在時刻
-import discord
 import io
 import datetime
+from PIL import Image, ImageDraw, ImageFont
+
 
 # "test"の画像検索
-import discord
 import requests
+from bs4 import BeautifulSoup    
 
 
 
@@ -103,20 +103,19 @@ class MyClient(discord.Client):
             intents.message_content = True
             client = discord.Client(intents=intents)
 
+
+
             # ランダムな画像URLのリスト
-            image_urls = [
-                "https://www.google.com/url?sa=i&url=https%3A%2F%2Fpixta.jp%2Ftags%2F%25E9%2581%25A9%25E5%25BD%2593%3Fsearch_type%3D2&psig=AOvVaw07YefohidI8qTFVlIBdRNt&ust=1724803749821000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCNiBgJHzk4gDFQAAAAAdAAAAABAE",
-                "https://www.google.com/url?sa=i&url=https%3A%2F%2Fnote.com%2Ftwentynine%2Fn%2Fn3cb88944d77b&psig=AOvVaw07YefohidI8qTFVlIBdRNt&ust=1724803749821000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCNiBgJHzk4gDFQAAAAAdAAAAABAJ",
-                "https://www.google.com/url?sa=i&url=https%3A%2F%2Ftwicomi.com%2Fsearch%2Fmanga%2F%2523%25E3%2583%25AA%25E3%2583%2597%25E3%2581%2597%25E3%2581%259F%25E4%25BA%25BA%25E3%2581%25AB%25E5%25BE%258C%25E6%2582%2594%25E3%2581%2599%25E3%2582%258B%25E3%2581%25BB%25E3%2581%25A9%25E9%2581%25A9%25E5%25BD%2593%25E3%2581%25AA%25E3%2582%25A4%25E3%2583%25A9%25E3%2582%25B9%25E3%2583%2588%25E3%2582%2592%25E6%258F%258F%25E3%2581%258F%2Fpage%2F1&psig=AOvVaw0D88Qkcb89LBy0pTEY2jSR&ust=1724803819953000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCKiyj7Lzk4gDFQAAAAAdAAAAABAE",
-                "https://www.google.com/url?sa=i&url=https%3A%2F%2Fpngtree.com%2Fso%2Fapple&psig=AOvVaw24MSa8Wv6RE2D9sTF1lu-3&ust=1724806235793000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCNjF1rP8k4gDFQAAAAAdAAAAABAJ"
-                # さらに画像のURLを追加
-            ]
+        image_urls = [
+            "https://admissions.rochester.edu/blog/wp-content/uploads/2015/08/test.png"
+
+        ]
             
                   
 
         if message.content.startswith('/image'):
             # ランダムな画像URLを選択
-            random_image_url = random.choice(IMAGE_URLS)
+            random_image_url = random.choice(image_urls)
             # メッセージを送信
             await message.channel.send(random_image_url)
 
@@ -124,10 +123,7 @@ class MyClient(discord.Client):
 
         # 画像で現在時刻
 
-        from PIL import Image, ImageDraw, ImageFont
-        import os
-        from dotenv import load_dotenv
-
+        
         if message.content == '/time-image':
             # 現在時刻を取得
             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -149,50 +145,51 @@ class MyClient(discord.Client):
 
 
         # "test"の画像検索
-        from bs4 import BeautifulSoup
-        import os
-        from dotenv import load_dotenv      
+        
 
 
-        def fetch_image_url(query):
+        async def fetch_image_url(query):
             # Google画像検索のURL
             search_url = f"https://www.google.com/search?hl=ja&tbm=isch&q={query}"
-    
+            
             # HTTPリクエストを送信
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
             }
             response = requests.get(search_url, headers=headers)
-    
+            
             # レスポンスのHTMLを解析
             soup = BeautifulSoup(response.text, 'html.parser')
     
             # 画像URLを取得
             try:
-                image_tag = soup.find('img', {'class': 'rg_i Q4LuWd'})
+                image_tag = soup.find('img', {'class': 'YQ4gaf'})
                 image_url = image_tag['src']
+                
                 return image_url
             except (AttributeError, TypeError):
                 return None
 
         
 
-            if message.content.startswith('/search'):
-                query = message.content[len('/search '):]
-                if query:
-                    image_url = fetch_image_url(query)
-                    if image_url:
-                        await message.channel.send(image_url)
-                    else:
-                        await message.channel.send("画像が見つかりませんでした。")
+        if message.content.startswith('/search'):
+            
+            query = message.content[len('/search '):]
+            if query:
+                image_url = await fetch_image_url(query)
+                if image_url:
+                    print(image_url)
+                    await message.channel.send(image_url)
                 else:
-                    await message.channel.send("検索クエリが指定されていません。")
+                    await message.channel.send("画像が見つかりませんでした。")
+            else:
+                await message.channel.send("検索クエリが指定されていません。")
 
 
 
         
 
-            print(f'Message from {message.author}: {message.content}')
+                print(f'Message from {message.author}: {message.content}')
 
 intents = discord.Intents.default()
 intents.message_content = True
